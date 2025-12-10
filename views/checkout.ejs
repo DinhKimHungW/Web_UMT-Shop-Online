@@ -1,0 +1,91 @@
+<%- include('partials/header') %>
+
+<h2 class="mb-4">Checkout</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">Shipping Information</div>
+            <div class="card-body">
+                <form id="checkout-form">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" value="<%= user.name %>" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" value="<%= user.phone %>" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Delivery Address</label>
+                        <textarea name="address" class="form-control" rows="3" required><%= user.address %></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select name="paymentMethod" class="form-select">
+                            <option value="COD">Cash on Delivery (COD)</option>
+                            <option value="Banking">Banking Transfer</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Order Summary</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush mb-3">
+                    <% cart.cart_items.forEach(item => { %>
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <h6 class="my-0"><%= item.products.name %></h6>
+                                <small class="text-muted">Qty: <%= item.qty %></small>
+                            </div>
+                            <span class="text-muted"><%= (item.qty * item.products.price).toLocaleString() %></span>
+                        </li>
+                    <% }) %>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total (VND)</span>
+                        <strong><%= total.toLocaleString() %></strong>
+                    </li>
+                </ul>
+                <button type="button" id="place-order-btn" class="btn btn-primary w-100">Place Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('place-order-btn').addEventListener('click', async function() {
+        const form = document.getElementById('checkout-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+                alert('Order placed successfully!');
+                window.location.href = result.redirectUrl;
+            } else {
+                alert(result.error || 'Error placing order');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error placing order');
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>

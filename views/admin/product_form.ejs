@@ -1,0 +1,119 @@
+<%- include('../partials/header') %>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 fw-bold text-primary"><%= product ? 'Edit Product' : 'Add New Product' %></h1>
+                <a href="/admin/products" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fas fa-arrow-left me-2"></i> Back
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form action="<%= product ? '/admin/products/edit/' + product.id : '/admin/products/add' %>" method="POST">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="name" class="form-label fw-bold">Product Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="<%= product ? product.name : '' %>" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="price" class="form-label fw-bold">Price (VND)</label>
+                                <input type="number" class="form-control" id="price" name="price" value="<%= product ? product.price : '' %>" required min="0">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="stock" class="form-label fw-bold">Stock Quantity</label>
+                                <input type="number" class="form-control" id="stock" name="stock" value="<%= product ? product.stock : '' %>" required min="0">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="category_id" class="form-label fw-bold">Category</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="category_id" name="category_id" required>
+                                        <option value="">Select Category</option>
+                                        <% categories.forEach(cat => { %>
+                                            <option value="<%= cat.id %>" <%= product && product.category_id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                                        <% }) %>
+                                    </select>
+                                    <button class="btn btn-outline-secondary" type="button" id="addCategoryBtn" title="Add New Category">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="image_url" class="form-label fw-bold">Image URL</label>
+                                <input type="url" class="form-control" id="image_url" name="image_url" value="<%= product && product.product_images && product.product_images[0] ? product.product_images[0].url : '' %>" placeholder="https://example.com/image.jpg">
+                                <div class="form-text">Enter a direct link to the product image.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="description" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="4"><%= product ? product.description : '' %></textarea>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-2"></i> <%= product ? 'Update Product' : 'Create Product' %>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('addCategoryBtn').addEventListener('click', async () => {
+        const { value: categoryName } = await Swal.fire({
+            title: 'Add New Category',
+            input: 'text',
+            inputLabel: 'Category Name',
+            inputPlaceholder: 'Enter category name',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        });
+
+        if (categoryName) {
+            try {
+                const response = await fetch('/admin/categories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: categoryName })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire('Success', 'Category added successfully', 'success');
+                    
+                    // Add new option to select and select it
+                    const select = document.getElementById('category_id');
+                    const option = document.createElement('option');
+                    option.value = result.category.id;
+                    option.text = result.category.name;
+                    option.selected = true;
+                    select.add(option);
+                } else {
+                    Swal.fire('Error', 'Failed to add category', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', 'An unexpected error occurred', 'error');
+            }
+        }
+    });
+</script>
+
+<%- include('../partials/footer') %>

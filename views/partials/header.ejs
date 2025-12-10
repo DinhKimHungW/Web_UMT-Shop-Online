@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | UMT Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fas fa-shopping-bag me-2"></i>
+                <span>UMT Shop</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/products">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/products?category=food">Food Service</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav align-items-center">
+                    <% if (user) { %>
+                        <li class="nav-item me-3">
+                            <a class="nav-link position-relative" href="/cart">
+                                <i class="fas fa-shopping-cart fa-lg"></i>
+                                <!-- Optional: Add badge here if you have cart count -->
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span><%= user.name || user.email %></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <% if (user.roles && (user.roles.name === 'admin_canteen' || user.roles.name === 'super_admin')) { %>
+                                    <li><a class="dropdown-item py-2 text-primary fw-bold" href="/admin"><i class="fas fa-tachometer-alt me-2"></i> Admin Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                <% } %>
+                                <li><a class="dropdown-item py-2" href="/profile"><i class="fas fa-user-circle me-2"></i> My Profile</a></li>
+                                <li><a class="dropdown-item py-2" href="/orders"><i class="fas fa-box me-2"></i> My Orders</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                            </ul>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light me-2 px-4 rounded-pill" href="/login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-light text-primary px-4 rounded-pill fw-bold" href="/register">Register</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid p-0">

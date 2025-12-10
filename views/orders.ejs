@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+    <div class="glass-card p-5 animate__animated animate__fadeInUp">
+        <h2 class="mb-4" style="color: var(--text-primary);">My Orders</h2>
+
+        <% if (!orders || orders.length === 0) { %>
+            <div class="alert glass-alert" role="alert">
+                You have no orders yet. <a href="/products" class="alert-link">Start shopping!</a>
+            </div>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-borderless" style="color: var(--text-secondary);">
+                    <thead style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order => { %>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <td>#<%= order.id %></td>
+                                <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+                                <td>
+                                    <span class="badge bg-<%= order.status === 'completed' ? 'success' : (order.status === 'pending' ? 'warning' : 'secondary') %>">
+                                        <%= order.status.toUpperCase() %>
+                                    </span>
+                                </td>
+                                <td><%= order.total_amount.toLocaleString() %> VND</td>
+                                <td>
+                                    <a href="/orders/<%= order.id %>" class="btn btn-sm btn-primary glass-btn">View Details</a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<style>
+    .glass-alert {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-primary);
+    }
+    .glass-alert a {
+        color: var(--accent-color);
+    }
+</style>
+
+<%- include('partials/footer') %>

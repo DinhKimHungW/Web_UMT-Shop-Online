@@ -1,0 +1,91 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary">Shop Products</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Products</li>
+            </ol>
+        </nav>
+    </div>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-danger shadow-sm border-0 mb-4" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> <%= error %>
+        </div>
+    <% } %>
+
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-body p-4">
+            <form action="/products" method="GET" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search for products..." value="<%= q || '' %>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        <option value="food" <%= category === 'food' ? 'selected' : '' %>>Food</option>
+                        <option value="drink" <%= category === 'drink' ? 'selected' : '' %>>Drink</option>
+                        <option value="sale" <%= category === 'sale' ? 'selected' : '' %>>On Sale</option>
+                        <option value="hot" <%= category === 'hot' ? 'selected' : '' %>>Hot Products</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4" id="product-list">
+        <%- include('partials/product_list', { products: products }) %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                        <a class="page-link rounded-circle mx-1 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" href="/products?page=<%= i %>&category=<%= category || '' %>&q=<%= q || '' %>" data-page="<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    <% } %>
+</div>
+
+<script>
+    document.addEventListener('click', async (e) => {
+        if (e.target.matches('.pagination a')) {
+            e.preventDefault();
+            const page = e.target.dataset.page;
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('page', page);
+            
+            try {
+                const res = await fetch(`/api/products/partial?${urlParams.toString()}`);
+                if (res.ok) {
+                    const html = await res.text();
+                    document.getElementById('product-list').innerHTML = html;
+                    window.history.pushState({}, '', `?${urlParams.toString()}`);
+                    
+                    // Update active state
+                    document.querySelectorAll('.pagination .page-item').forEach(li => li.classList.remove('active'));
+                    e.target.closest('.page-item').classList.add('active');
+                    
+                    // Scroll to top of product list
+                    document.getElementById('product-list').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (err) {
+                console.error('Error fetching products:', err);
+            }
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>
